@@ -10,7 +10,6 @@
 
     <script type="module">
         import * as THREE from 'https://unpkg.com/three@0.126.1/build/three.module.js';
-        import { OrbitControls } from 'https://unpkg.com/three@0.126.1/examples/jsm/controls/OrbitControls.js';
         import { FBXLoader } from 'https://unpkg.com/three@0.126.1/examples/jsm/loaders/FBXLoader.js';
 
         init();
@@ -30,37 +29,10 @@
             const camera = new THREE.PerspectiveCamera(20, window.innerWidth / window.innerHeight, 0.1, 5000);
             camera.position.set(0, 0, 800);
             camera.rotation.set(0, 0, 0);
-            // カメラコントローラー
-            // const controls = new OrbitControls(camera, document.body);
 
-            //光源1
+            //光源
             const ambLight = new THREE.AmbientLight(0xffffff, 1.6);//color,強度
             scene.add(ambLight);
-            //光源2
-            // const ambLight = new THREE.AmbientLight(0xffffff, 1);//color,強度
-            // scene.add(ambLight);
-            // const dirLight = new THREE.DirectionalLight(0xffffff, 0.2);//color,強度
-            // scene.add(dirLight);
-            // dirLight.castShadow = true;
-
-            // -------------------オブジェクト-------------------
-            //fbxファイルの読み込み
-            const loader = new FBXLoader();
-            loader.load('ghost.fbx', (fbx) => {
-                fbx.scale.set(1, 1, 1);
-                //シーン内の特定のオブジェクトのアニメーション用のプレーヤー(アニメーションの調整)
-                mixer = new THREE.AnimationMixer(fbx);
-                //Animation Actionを生成
-                const action = mixer.clipAction(fbx.animations[0]);
-                //アニメーションを再生する
-                action.play();
-                scene.add(fbx);
-            });
-
-            loader.load('background.fbx', (fbx) => {
-                fbx.scale.set(1, 1, 1);
-                scene.add(fbx);
-            });
 
             // -------------------操作-------------------
             //マウスカーソルの位置を取得
@@ -73,24 +45,40 @@
                 mouseY = event.clientY - height / 2;
             })
 
-            // -------------------描画-------------------
-            //アニメーション処理
-            const clock = new THREE.Clock();
-            let mixer;
-            function animate() {
-                if (mixer) {
+            // -------------------オブジェクト-------------------
+            //fbxファイルの読み込み
+            const loader = new FBXLoader();
+            loader.load('ghost.fbx', (fbx) => {
+                fbx.scale.set(1, 1, 1);
+                //シーン内の特定のオブジェクトのアニメーション用のプレーヤー(アニメーションの調整)
+                const mixer = new THREE.AnimationMixer(fbx);
+                //Animation Actionを生成
+                const action = mixer.clipAction(fbx.animations[0]);
+                //アニメーションを再生する
+                action.play();
+                scene.add(fbx);
+
+                // アニメーション処理
+                const clock = new THREE.Clock();
+                function animate() {
                     mixer.update(clock.getDelta());
+                    requestAnimationFrame(animate);
+
+                    // カメラ操作
+                    camera.rotation.x = -mouseY / 2000 - 0.44;
+                    camera.rotation.y = -mouseX / 1700;
+                    camera.position.x = -mouseX / 1.8;
+                    camera.position.y = mouseY / 2 + 400;
+
+                    renderer.render(scene, camera);
                 }
-                requestAnimationFrame(animate);
-                // カメラ操作
-                camera.rotation.x = -mouseY / 2000 - 0.44;
-                camera.rotation.y = -mouseX / 1700;
-                camera.position.x = -mouseX / 1.8;
-                camera.position.y = mouseY / 2 + 400;
-                // レンダリング実行
-                renderer.render(scene, camera);
-            }
-            animate();
+                animate();
+            });
+
+            loader.load('background.fbx', (fbx) => {
+                fbx.scale.set(1, 1, 1);
+                scene.add(fbx);
+            });
 
             renderer.outputEncoding = THREE.sRGBEncoding;
             document.getElementById("WebGL-output").appendChild(renderer.domElement);
