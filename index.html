@@ -18,7 +18,7 @@
             //レンダラー
             const renderer = new THREE.WebGLRenderer;
             //背景色
-            renderer.setClearColor(new THREE.Color(0xf7f4eb));
+            renderer.setClearColor(new THREE.Color(0x000000));
             renderer.setSize(window.innerWidth, window.innerHeight);
 
             // -------------------シーン-------------------
@@ -31,8 +31,11 @@
             camera.rotation.set(0, 0, 0);
 
             //光源
-            const ambLight = new THREE.AmbientLight(0xffffff, 1.6);//color,強度
+            const ambLight = new THREE.AmbientLight(0xffffff, 0.5);//color,強度
             scene.add(ambLight);
+            //光源
+            const pointLight = new THREE.DirectionalLight(0xffffff, 1.0);//color,強度
+            scene.add(pointLight);
 
             // -------------------操作-------------------
             //マウスカーソルの位置を取得
@@ -49,7 +52,7 @@
             //fbxファイルの読み込み
             const loader = new FBXLoader();
             loader.load('ghost.fbx', (fbx) => {
-                fbx.scale.set(1, 1, 1);
+                fbx.scale.set(1.5, 1.5, 1.5);
                 //シーン内の特定のオブジェクトのアニメーション用のプレーヤー(アニメーションの調整)
                 const mixer = new THREE.AnimationMixer(fbx);
                 //Animation Actionを生成
@@ -68,7 +71,7 @@
                     camera.rotation.x = -mouseY / 2000 - 0.44;
                     camera.rotation.y = -mouseX / 1700;
                     camera.position.x = -mouseX / 1.8;
-                    camera.position.y = mouseY / 2 + 400;
+                    camera.position.y = mouseY / 2 + 440;
 
                     renderer.render(scene, camera);
                 }
